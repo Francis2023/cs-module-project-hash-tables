@@ -23,6 +23,7 @@ class HashTable:
     def __init__(self, capacity):
         # Your code here
         self.array = [None] * capacity
+      
 
     def get_num_slots(self):
         """
@@ -35,6 +36,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        return len(self.array)
 
 
     def get_load_factor(self):
@@ -44,6 +46,8 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        
+        return self.size / self.capacity
 
 
     def fnv1(self, key):
@@ -54,6 +58,14 @@ class HashTable:
         """
 
         # Your code here
+        encodedStr = key.encode()
+
+        total = 0
+        for element in encodedStr:
+            total += element
+            total &= 0xffffffff
+        
+        return total
 
 
     def djb2(self, key):
@@ -64,10 +76,9 @@ class HashTable:
         """
         # Your code here
         hash = 5381
-        for x in self.key:
-            hash = ((hash << 5) + hash) + ord(x)
-        
-        return hash & 0xFFFFFFFF
+        for x in key:
+            hash = (hash << 5) + hash + ord(x)
+        return (hash  & 0xfffffff)
 
     def hash_index(self, key):
         """
@@ -86,9 +97,14 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        index = self.djb2(key)
-        self.array[index] = self.value
-        print(self.array)
+        index = self.hash_index(key)
+
+
+        if self.array[index] != None:
+            print(f"Collision! Overwriting {repr(self.array[index])}!")
+        self.array[index] = value
+       
+       
 
 
     def delete(self, key):
@@ -100,13 +116,16 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        index = self.djb2(key)
+        
+        index = self.hash_index(key)
+        self.array[index] = None
+        
 
-        if self.array[index] is None:
-            print('Key not found!')
-        else:
-            self.array[index] = None
-            print(self.array)
+        # if self.array[index] is None:
+        #     print('Key not found!')
+        # else:
+        #     self.array[index] = None
+        #     print(self.array)
 
     def get(self, key):
         """
@@ -117,13 +136,11 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        index = self.djb2(key)
+        index = self.hash_index(key)
         
-        if self.array[index] is None:
-            return None
-        else: 
-            return self.array[index]
-
+        return self.array[index]
+          
+            
 
     def resize(self, new_capacity):
         """
@@ -133,6 +150,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        self.newArray = [None] * new_capacity
 
 
 
@@ -154,7 +172,7 @@ if __name__ == "__main__":
 
     print("")
 
-    # Test storing beyond capacity
+     # Test storing beyond capacity
     for i in range(1, 13):
         print(ht.get(f"line_{i}"))
 
@@ -163,7 +181,7 @@ if __name__ == "__main__":
     ht.resize(ht.capacity * 2)
     new_capacity = ht.get_num_slots()
 
-    print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+   # print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
     # Test if data intact after resizing
     for i in range(1, 13):
